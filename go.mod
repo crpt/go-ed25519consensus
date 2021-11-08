@@ -1,5 +1,5 @@
-module github.com/hdevalence/ed25519consensus
+module github.com/crpt/go-ed25519consensus
 
-go 1.14
+go 1.17
 
-require filippo.io/edwards25519 v1.0.0-beta.3
+require filippo.io/edwards25519 v1.0.0-rc.1

@@ -1,5 +1,8 @@
 # Ed25519 for consensus-critical contexts
 
+This module is a (hopefully temporary) fork of [ed25519consensus](https://pkg.go.dev/github.com/hdevalence/ed25519consensus)
+package modified to use `filippo.io/edwards25519@v1.0.0-rc.1` instead of `v1.0.0-beta.3`.
+
 This library provides an Ed25519 implementation with validation rules intended
 for consensus-critical contexts.
 

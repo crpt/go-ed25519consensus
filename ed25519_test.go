@@ -4,7 +4,7 @@ import (
 	"crypto/ed25519"
 	"testing"
 
-	"github.com/hdevalence/ed25519consensus"
+	"github.com/crpt/go-ed25519consensus"
 )
 
 func BenchmarkVerification(b *testing.B) {

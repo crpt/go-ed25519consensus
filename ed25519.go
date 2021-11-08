@@ -39,7 +39,11 @@ func Verify(publicKey ed25519.PublicKey, message, sig []byte) bool {
 	var digest [64]byte
 	h.Sum(digest[:0])
 
-	hReduced := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	hReduced, err := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	// This should never happen.
+	if err != nil {
+		panic(err)
+	}
 
 	// ZIP215: this works because SetBytes does not check that encodings are canonical.
 	checkR, err := new(edwards25519.Point).SetBytes(sig[:32])
