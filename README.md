@@ -1,6 +1,9 @@
-# Ed25519 for consensus-critical contexts
+# Ed25519-SHA3-512 for consensus-critical contexts
 
-This library provides an Ed25519 implementation with validation rules intended
+This module is a fork of [ed25519consensus](https://pkg.go.dev/github.com/hdevalence/ed25519consensus) package
+modified to use **SHA3-512** hash function instead of **SHA-512** used in the original code.
+
+This library provides an Ed25519-SHA3-512 implementation with validation rules intended
 for consensus-critical contexts.
 
 Ed25519 signatures are widely used in consensus-critical contexts (e.g.,
@@ -37,7 +40,7 @@ This repository contains a fork of Go's `crypto/ed25519` package with support
 for [ZIP215] verification.
 
 Note that the ZIP215 rules ensure that individual and batch verification are
-guaranteed to give the same results, so unlike `ed25519.Verify`, `ed25519consensus.Verify` is
+guaranteed to give the same results, so unlike `ed25519sha3.Verify`, `ed25519consensus.Verify` is
 compatible with batch verification (though this is not yet implemented by this
 library).
 

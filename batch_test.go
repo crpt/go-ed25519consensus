@@ -1,11 +1,12 @@
 package ed25519consensus
 
 import (
-	"crypto/ed25519"
 	"fmt"
 	"testing"
 
 	"filippo.io/edwards25519"
+
+	ed25519sha3 "github.com/crpt/go-ed25519-sha3-512"
 )
 
 func TestBatch(t *testing.T) {
@@ -19,7 +20,7 @@ func TestBatch(t *testing.T) {
 
 func TestBatchFailsOnShortSig(t *testing.T) {
 	v := NewBatchVerifier()
-	pub, _, _ := ed25519.GenerateKey(nil)
+	pub, _, _ := ed25519sha3.GenerateKey(nil)
 	v.Add(pub, []byte("message"), []byte{})
 	if v.Verify() {
 		t.Error("batch verification should fail due to short signature")
@@ -67,9 +68,9 @@ func BenchmarkVerifyBatch(b *testing.B) {
 			b.ReportAllocs()
 			v := NewBatchVerifier()
 			for i := 0; i < n; i++ {
-				pub, priv, _ := ed25519.GenerateKey(nil)
+				pub, priv, _ := ed25519sha3.GenerateKey(nil)
 				msg := []byte("BatchVerifyTest")
-				v.Add(pub, msg, ed25519.Sign(priv, msg))
+				v.Add(pub, msg, ed25519sha3.Sign(priv, msg))
 			}
 			// NOTE: dividing by n so that metrics are per-signature
 			for i := 0; i < b.N/n; i++ {
@@ -86,7 +87,7 @@ func populateBatchVerifier(t *testing.T, v *BatchVerifier) {
 	*v = NewBatchVerifier()
 	for i := 0; i <= 38; i++ {
 
-		pub, priv, _ := ed25519.GenerateKey(nil)
+		pub, priv, _ := ed25519sha3.GenerateKey(nil)
 
 		var msg []byte
 		if i%2 == 0 {
@@ -95,7 +96,7 @@ func populateBatchVerifier(t *testing.T, v *BatchVerifier) {
 			msg = []byte("egg")
 		}
 
-		sig := ed25519.Sign(priv, msg)
+		sig := ed25519sha3.Sign(priv, msg)
 
 		v.Add(pub, msg, sig)
 	}

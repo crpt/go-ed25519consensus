@@ -7,21 +7,21 @@
 package ed25519consensus
 
 import (
-	"crypto/ed25519"
-	"crypto/sha512"
-
 	"filippo.io/edwards25519"
+	"golang.org/x/crypto/sha3"
+
+	ed25519sha3 "github.com/crpt/go-ed25519-sha3-512"
 )
 
 // Verify reports whether sig is a valid signature of message by
 // publicKey, using precisely-specified validation criteria (ZIP 215) suitable
 // for use in consensus-critical contexts.
-func Verify(publicKey ed25519.PublicKey, message, sig []byte) bool {
-	if l := len(publicKey); l != ed25519.PublicKeySize {
+func Verify(publicKey ed25519sha3.PublicKey, message, sig []byte) bool {
+	if l := len(publicKey); l != ed25519sha3.PublicKeySize {
 		return false
 	}
 
-	if len(sig) != ed25519.SignatureSize || sig[63]&224 != 0 {
+	if len(sig) != ed25519sha3.SignatureSize || sig[63]&224 != 0 {
 		return false
 	}
 
@@ -32,14 +32,18 @@ func Verify(publicKey ed25519.PublicKey, message, sig []byte) bool {
 	}
 	A.Negate(A)
 
-	h := sha512.New()
+	h := sha3.New512()
 	h.Write(sig[:32])
 	h.Write(publicKey[:])
 	h.Write(message)
 	var digest [64]byte
 	h.Sum(digest[:0])
 
-	hReduced := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	hReduced, err := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	// This should never happen.
+	if err != nil {
+		panic(err)
+	}
 
 	// ZIP215: this works because SetBytes does not check that encodings are canonical.
 	checkR, err := new(edwards25519.Point).SetBytes(sig[:32])

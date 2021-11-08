@@ -1,11 +1,12 @@
 package ed25519consensus
 
 import (
-	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/sha512"
 
 	"filippo.io/edwards25519"
+	"golang.org/x/crypto/sha3"
+
+	ed25519sha3 "github.com/crpt/go-ed25519-sha3-512"
 )
 
 // BatchVerifier accumulates batch entries with Add, before performing batch verification with Verify.
@@ -15,7 +16,7 @@ type BatchVerifier struct {
 
 // entry represents a batch entry with the public key, signature and scalar which the caller wants to verify
 type entry struct {
-	pubkey    ed25519.PublicKey
+	pubkey    ed25519sha3.PublicKey
 	signature []byte
 	k         *edwards25519.Scalar
 }
@@ -28,14 +29,14 @@ func NewBatchVerifier() BatchVerifier {
 }
 
 // Add adds a (public key, message, sig) triple to the current batch.
-func (v *BatchVerifier) Add(publicKey ed25519.PublicKey, message, sig []byte) {
+func (v *BatchVerifier) Add(publicKey ed25519sha3.PublicKey, message, sig []byte) {
 	// Compute the challenge scalar for this entry upfront, so that we don't
 	// introduce a dependency on the lifetime of the message array. This doesn't
 	// matter so much for Go, which has garbage collection, but did matter for
 	// the Rust implementation this was ported from, but not keeping buffers
 	// alive for longer than they have to is nice to do anyways.
 
-	h := sha512.New()
+	h := sha3.New512()
 
 	// R_bytes is the first 32 bytes of the signature, but because the signature
 	// is passed as a variable-length array it could be too short. In that case
@@ -51,7 +52,11 @@ func (v *BatchVerifier) Add(publicKey ed25519.PublicKey, message, sig []byte) {
 	var digest [64]byte
 	h.Sum(digest[:0])
 
-	k := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	k, err := new(edwards25519.Scalar).SetUniformBytes(digest[:])
+	// This should never happen.
+	if err != nil {
+		panic(err)
+	}
 
 	e := entry{
 		pubkey:    publicKey,
